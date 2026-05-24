@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class ClinicVisit extends Model
 {
+    public const DISPOSITION_SENT_HOME = 'sent_home';
+
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);

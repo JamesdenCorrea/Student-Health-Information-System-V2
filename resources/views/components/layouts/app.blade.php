@@ -20,6 +20,14 @@
                     @auth
                         <a href="{{ route('dashboard') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('dashboard') ? 'bg-teal-950 text-white' : 'text-slate-700 hover:bg-teal-50 hover:text-teal-950' }}">Dashboard</a>
                         <a href="{{ route('profiles.index') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('profiles.*') ? 'bg-teal-950 text-white' : 'text-slate-700 hover:bg-teal-50 hover:text-teal-950' }}">Profiles</a>
+                        @if (auth()->user()->isClinicStaff())
+                            <a href="{{ route('health-records.index') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('health-records.*') ? 'bg-teal-950 text-white' : 'text-slate-700 hover:bg-teal-50 hover:text-teal-950' }}">Health Records</a>
+                        @endif
+                        @if (auth()->user()->isAdmin())
+                            <a href="{{ route('admin.users.index') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.users.*') ? 'bg-teal-950 text-white' : 'text-slate-700 hover:bg-teal-50 hover:text-teal-950' }}">Users</a>
+                            <a href="{{ route('admin.parent-assignments.index') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.parent-assignments.*') ? 'bg-teal-950 text-white' : 'text-slate-700 hover:bg-teal-50 hover:text-teal-950' }}">Parents</a>
+                        @endif
+                        <a href="{{ route('analytics') }}" class="rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('analytics') ? 'bg-teal-950 text-white' : 'text-slate-700 hover:bg-teal-50 hover:text-teal-950' }}">Analytics</a>
                     @else
                         <a href="{{ route('login') }}" class="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-teal-50 hover:text-teal-950">Login</a>
                         <a href="{{ route('register') }}" class="rounded-md bg-teal-950 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-900">Register</a>

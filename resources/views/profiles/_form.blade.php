@@ -1,5 +1,6 @@
 @php
     $healthProfile = $student->healthProfile;
+    $canEditHealth = auth()->user()->isClinicStaff();
     $fieldClass = 'mt-2 w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-teal-800 focus:ring-2 focus:ring-teal-800/15';
     $labelClass = 'block text-sm font-medium text-slate-700';
     $arrayValue = fn ($field) => old("health_profile.$field", implode(', ', $healthProfile?->{$field} ?? []));
@@ -60,11 +61,13 @@
         <input class="{{ $fieldClass }}" id="section" name="section" value="{{ old('section', $student->section) }}">
         @error('section') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
     </div>
-    <div>
-        <label class="{{ $labelClass }}" for="blood_type">Blood type</label>
-        <input class="{{ $fieldClass }}" id="blood_type" name="health_profile[blood_type]" value="{{ old('health_profile.blood_type', $healthProfile?->blood_type) }}">
-        @error('health_profile.blood_type') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
-    </div>
+    @if ($canEditHealth)
+        <div>
+            <label class="{{ $labelClass }}" for="blood_type">Blood type</label>
+            <input class="{{ $fieldClass }}" id="blood_type" name="health_profile[blood_type]" value="{{ old('health_profile.blood_type', $healthProfile?->blood_type) }}">
+            @error('health_profile.blood_type') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
+        </div>
+    @endif
 </div>
 
 <div class="mt-8 grid gap-5 md:grid-cols-2">
@@ -86,37 +89,43 @@
     </div>
 </div>
 
-<div class="mt-8 grid gap-5 md:grid-cols-2">
-    <div>
-        <label class="{{ $labelClass }}" for="allergies">Allergies</label>
-        <input class="{{ $fieldClass }}" id="allergies" name="health_profile[allergies]" value="{{ $arrayValue('allergies') }}" placeholder="Comma separated">
+@if ($canEditHealth)
+    <div class="mt-8 grid gap-5 md:grid-cols-2">
+        <div>
+            <label class="{{ $labelClass }}" for="allergies">Allergies</label>
+            <input class="{{ $fieldClass }}" id="allergies" name="health_profile[allergies]" value="{{ $arrayValue('allergies') }}" placeholder="Comma separated">
+        </div>
+        <div>
+            <label class="{{ $labelClass }}" for="chronic_conditions">Chronic conditions</label>
+            <input class="{{ $fieldClass }}" id="chronic_conditions" name="health_profile[chronic_conditions]" value="{{ $arrayValue('chronic_conditions') }}" placeholder="Comma separated">
+        </div>
+        <div>
+            <label class="{{ $labelClass }}" for="medications">Medications</label>
+            <input class="{{ $fieldClass }}" id="medications" name="health_profile[medications]" value="{{ $arrayValue('medications') }}" placeholder="Comma separated">
+        </div>
+        <div>
+            <label class="{{ $labelClass }}" for="immunizations">Immunizations</label>
+            <input class="{{ $fieldClass }}" id="immunizations" name="health_profile[immunizations]" value="{{ $arrayValue('immunizations') }}" placeholder="Comma separated">
+        </div>
+        <div>
+            <label class="{{ $labelClass }}" for="physician_name">Physician name</label>
+            <input class="{{ $fieldClass }}" id="physician_name" name="health_profile[physician_name]" value="{{ old('health_profile.physician_name', $healthProfile?->physician_name) }}">
+        </div>
+        <div>
+            <label class="{{ $labelClass }}" for="physician_contact">Physician contact</label>
+            <input class="{{ $fieldClass }}" id="physician_contact" name="health_profile[physician_contact]" value="{{ old('health_profile.physician_contact', $healthProfile?->physician_contact) }}">
+        </div>
     </div>
-    <div>
-        <label class="{{ $labelClass }}" for="chronic_conditions">Chronic conditions</label>
-        <input class="{{ $fieldClass }}" id="chronic_conditions" name="health_profile[chronic_conditions]" value="{{ $arrayValue('chronic_conditions') }}" placeholder="Comma separated">
-    </div>
-    <div>
-        <label class="{{ $labelClass }}" for="medications">Medications</label>
-        <input class="{{ $fieldClass }}" id="medications" name="health_profile[medications]" value="{{ $arrayValue('medications') }}" placeholder="Comma separated">
-    </div>
-    <div>
-        <label class="{{ $labelClass }}" for="immunizations">Immunizations</label>
-        <input class="{{ $fieldClass }}" id="immunizations" name="health_profile[immunizations]" value="{{ $arrayValue('immunizations') }}" placeholder="Comma separated">
-    </div>
-    <div>
-        <label class="{{ $labelClass }}" for="physician_name">Physician name</label>
-        <input class="{{ $fieldClass }}" id="physician_name" name="health_profile[physician_name]" value="{{ old('health_profile.physician_name', $healthProfile?->physician_name) }}">
-    </div>
-    <div>
-        <label class="{{ $labelClass }}" for="physician_contact">Physician contact</label>
-        <input class="{{ $fieldClass }}" id="physician_contact" name="health_profile[physician_contact]" value="{{ old('health_profile.physician_contact', $healthProfile?->physician_contact) }}">
-    </div>
-</div>
 
-<div class="mt-8">
-    <label class="{{ $labelClass }}" for="notes">Health notes</label>
-    <textarea class="{{ $fieldClass }} min-h-28" id="notes" name="health_profile[notes]">{{ old('health_profile.notes', $healthProfile?->notes) }}</textarea>
-</div>
+    <div class="mt-8">
+        <label class="{{ $labelClass }}" for="notes">Health notes</label>
+        <textarea class="{{ $fieldClass }} min-h-28" id="notes" name="health_profile[notes]">{{ old('health_profile.notes', $healthProfile?->notes) }}</textarea>
+    </div>
+@else
+    <div class="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        Health-related fields are available only to clinic staff.
+    </div>
+@endif
 
 <div class="mt-8 flex justify-end gap-3">
     <a href="{{ route('profiles.index') }}" class="rounded-md border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-teal-800 hover:text-teal-950">Cancel</a>

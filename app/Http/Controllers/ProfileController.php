@@ -13,8 +13,11 @@ class ProfileController extends Controller
 {
     public function index(Request $request): View
     {
+        $user = $request->user();
+
         $profiles = Student::query()
             ->with('healthProfile')
+            ->when($user->isParent(), fn ($query) => $query->whereHas('parents', fn ($query) => $query->whereKey($user->id)))
             ->when($request->query('search'), function ($query, string $search): void {
                 $query->where(function ($query) use ($search): void {
                     $query
@@ -33,20 +36,27 @@ class ProfileController extends Controller
 
     public function create(): View
     {
+        abort_unless(auth()->user()->isAdmin() || auth()->user()->isClinicStaff(), 403);
+
         return view('profiles.create', ['student' => new Student]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $this->validateProfile($request);
-        $validated['health_profile'] = $this->normalizeHealthProfile($validated['health_profile'] ?? []);
+        abort_unless($request->user()->isAdmin() || $request->user()->isClinicStaff(), 403);
 
-        $student = DB::transaction(function () use ($validated): Student {
-            $profile = $validated['health_profile'] ?? [];
+        $validated = $this->validateProfile($request);
+        $healthProfile = $request->user()->isClinicStaff()
+            ? $this->normalizeHealthProfile($validated['health_profile'] ?? [])
+            : [];
+
+        $student = DB::transaction(function () use ($validated, $healthProfile): Student {
             unset($validated['health_profile']);
 
             $student = Student::create($validated);
-            $student->healthProfile()->create($profile);
+            if ($healthProfile !== []) {
+                $student->healthProfile()->create($healthProfile);
+            }
 
             return $student;
         });
@@ -58,30 +68,45 @@ class ProfileController extends Controller
 
     public function show(Student $profile): View
     {
+        abort_unless(request()->user()->canViewStudent($profile), 403);
+
         return view('profiles.show', [
-            'student' => $profile->load(['healthProfile', 'clinicVisits' => fn ($query) => $query->latest('visited_at')]),
+            'student' => $profile->load([
+                'healthProfile',
+                'clinicVisits' => fn ($query) => $query->latest('visited_at'),
+                'bmiRecords' => fn ($query) => $query->latest('checked_at'),
+                'dentalRecords' => fn ($query) => $query->latest('recorded_at'),
+                'parents',
+            ]),
         ]);
     }
 
     public function edit(Student $profile): View
     {
+        abort_unless(auth()->user()->isAdmin() || auth()->user()->isClinicStaff(), 403);
+
         return view('profiles.edit', ['student' => $profile->load('healthProfile')]);
     }
 
     public function update(Request $request, Student $profile): RedirectResponse
     {
-        $validated = $this->validateProfile($request, $profile);
-        $validated['health_profile'] = $this->normalizeHealthProfile($validated['health_profile'] ?? []);
+        abort_unless($request->user()->isAdmin() || $request->user()->isClinicStaff(), 403);
 
-        DB::transaction(function () use ($profile, $validated): void {
-            $healthProfile = $validated['health_profile'] ?? [];
+        $validated = $this->validateProfile($request, $profile);
+        $healthProfile = $request->user()->isClinicStaff()
+            ? $this->normalizeHealthProfile($validated['health_profile'] ?? [])
+            : null;
+
+        DB::transaction(function () use ($profile, $validated, $healthProfile): void {
             unset($validated['health_profile']);
 
             $profile->update($validated);
-            $profile->healthProfile()->updateOrCreate(
-                ['student_id' => $profile->id],
-                $healthProfile,
-            );
+            if ($healthProfile !== null) {
+                $profile->healthProfile()->updateOrCreate(
+                    ['student_id' => $profile->id],
+                    $healthProfile,
+                );
+            }
         });
 
         return redirect()
@@ -91,6 +116,8 @@ class ProfileController extends Controller
 
     public function destroy(Student $profile): RedirectResponse
     {
+        abort_unless(auth()->user()->isAdmin(), 403);
+
         $profile->delete();
 
         return redirect()
@@ -122,7 +149,7 @@ class ProfileController extends Controller
             'emergency_contact_name' => ['nullable', 'string', 'max:255'],
             'emergency_contact_phone' => ['nullable', 'string', 'max:255'],
             'status' => ['required', 'string', 'max:50'],
-            'health_profile' => ['sometimes', 'array'],
+            'health_profile' => [$request->user()->isClinicStaff() ? 'sometimes' : 'prohibited', 'array'],
             'health_profile.blood_type' => ['nullable', 'string', 'max:10'],
             'health_profile.allergies' => ['nullable', 'string'],
             'health_profile.chronic_conditions' => ['nullable', 'string'],

@@ -7,20 +7,30 @@
                     <h1 class="mt-1 text-3xl font-semibold">{{ $student->first_name }} {{ $student->last_name }}</h1>
                     <p class="mt-2 text-teal-50/80">Grade {{ $student->grade_level ?? 'N/A' }} {{ $student->section }}</p>
                 </div>
-                <div class="flex gap-3">
-                    <a href="{{ route('profiles.edit', $student) }}" class="rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-teal-950 shadow-sm hover:bg-teal-50">Edit</a>
-                    <form method="POST" action="{{ route('profiles.destroy', $student) }}" onsubmit="return confirm('Delete this profile?')">
-                        @csrf
-                        @method('DELETE')
-                        <button class="rounded-md border border-white/30 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10">Delete</button>
-                    </form>
-                </div>
+                @if (! auth()->user()->isParent())
+                    <div class="flex flex-wrap gap-3">
+                        <a href="{{ route('profiles.edit', $student) }}" class="rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-teal-950 shadow-sm hover:bg-teal-50">Edit</a>
+                        @if (auth()->user()->isClinicStaff())
+                            <a href="{{ route('clinic-visits.create', $student) }}" class="rounded-md border border-white/30 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10">Clinic visit</a>
+                            <a href="{{ route('bmi-records.create', $student) }}" class="rounded-md border border-white/30 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10">BMI</a>
+                            <a href="{{ route('dental-records.edit', $student) }}" class="rounded-md border border-white/30 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10">Dental</a>
+                        @endif
+                        @if (auth()->user()->isAdmin())
+                            <form method="POST" action="{{ route('profiles.destroy', $student) }}" onsubmit="return confirm('Delete this profile?')">
+                                @csrf
+                                @method('DELETE')
+                                <button class="rounded-md border border-white/30 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10">Delete</button>
+                            </form>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
     </section>
 
     <section class="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
         <div class="space-y-6">
+            @if (auth()->user()->canViewHealthRecords($student))
             <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
                 <h2 class="font-semibold text-slate-950">Student information</h2>
                 <dl class="mt-5 grid gap-4 sm:grid-cols-2">
@@ -40,6 +50,44 @@
                     @endforeach
                 </dl>
             </div>
+            @else
+                <div class="rounded-lg border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-900">
+                    Health details are restricted to clinic staff and assigned parents.
+                </div>
+            @endif
+
+            @if (auth()->user()->canViewHealthRecords($student))
+                <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                    <h2 class="font-semibold text-slate-950">Yearly BMI</h2>
+                    <div class="mt-4 divide-y divide-slate-100">
+                        @forelse ($student->bmiRecords as $record)
+                            <div class="grid gap-2 py-3 text-sm sm:grid-cols-4">
+                                <span>{{ $record->school_year }}</span>
+                                <span>{{ $record->height_cm }} cm</span>
+                                <span>{{ $record->weight_kg }} kg</span>
+                                <span class="font-medium">{{ $record->bmi }} · {{ $record->category }}</span>
+                            </div>
+                        @empty
+                            <p class="text-sm text-slate-500">No BMI records yet.</p>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                    <h2 class="font-semibold text-slate-950">Dental records</h2>
+                    <div class="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-8">
+                        @foreach ($student->dentalRecords->groupBy('tooth_code')->map->first() as $tooth => $record)
+                            <div class="rounded-md border border-slate-200 p-2 text-center text-xs">
+                                <p class="font-semibold">{{ $tooth }}</p>
+                                <p class="mt-1 text-slate-600">{{ $record->condition }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                    @if ($student->dentalRecords->isEmpty())
+                        <p class="mt-4 text-sm text-slate-500">No dental records yet.</p>
+                    @endif
+                </div>
+            @endif
 
             <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
                 <h2 class="font-semibold text-slate-950">Health profile</h2>
@@ -65,6 +113,7 @@
             </div>
         </div>
 
+        @if (auth()->user()->canViewHealthRecords($student))
         <aside class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
             <h2 class="font-semibold text-slate-950">Clinic visits</h2>
             <div class="mt-5 space-y-4">
@@ -81,5 +130,6 @@
                 @endforelse
             </div>
         </aside>
+        @endif
     </section>
 </x-layouts.app>

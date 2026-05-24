@@ -18,17 +18,25 @@
                 <p class="text-sm font-medium text-slate-500">Student profiles</p>
                 <p class="mt-3 text-3xl font-semibold">{{ $studentCount }}</p>
             </div>
-            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-medium text-slate-500">Health records</p>
-                <p class="mt-3 text-3xl font-semibold">{{ $profileCount }}</p>
-            </div>
-            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-medium text-slate-500">Clinic visits</p>
-                <p class="mt-3 text-3xl font-semibold">{{ $visitCount }}</p>
-            </div>
+            @if (! auth()->user()->isAdmin())
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Health records</p>
+                    <p class="mt-3 text-3xl font-semibold">{{ $profileCount }}</p>
+                </div>
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Clinic visits</p>
+                    <p class="mt-3 text-3xl font-semibold">{{ $visitCount }}</p>
+                </div>
+            @else
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm md:col-span-2">
+                    <p class="text-sm font-medium text-slate-500">Admin access</p>
+                    <p class="mt-3 text-sm leading-6 text-slate-700">Health records are restricted to clinic staff. Admin users manage users, students, parent assignments, and non-health analytics.</p>
+                </div>
+            @endif
         </div>
 
         <div class="mt-8 grid gap-6 lg:grid-cols-2">
+            @if (! auth()->user()->isAdmin())
             <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
                 <div class="border-b border-slate-100 px-5 py-4">
                     <h2 class="font-semibold">Recent profiles</h2>
@@ -60,6 +68,7 @@
                     @endforelse
                 </div>
             </div>
+            @endif
         </div>
     </section>
 </x-layouts.app>
