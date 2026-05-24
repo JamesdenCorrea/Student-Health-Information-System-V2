@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'student_number',
+    'photo_path',
     'first_name',
     'middle_name',
     'last_name',

@@ -9,3 +9,81 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+.dental-arch {
+    display: grid;
+    grid-template-columns: repeat(16, minmax(28px, 1fr));
+    gap: 6px;
+    align-items: center;
+}
+
+.tooth {
+    position: relative;
+    display: grid;
+    min-height: 54px;
+    place-items: center;
+    border: 1px solid;
+    border-radius: 55% 55% 42% 42%;
+    background: #fff;
+    color: #0f172a;
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: inset 0 -10px 0 rgb(15 23 42 / 0.04), 0 1px 2px rgb(15 23 42 / 0.08);
+}
+
+.tooth::after {
+    content: "";
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    width: 42%;
+    height: 14px;
+    border-right: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    border-left: 1px solid currentColor;
+    border-radius: 0 0 50% 50%;
+    opacity: 0.22;
+    transform: translateX(-50%);
+}
+
+.tooth-lower {
+    border-radius: 42% 42% 55% 55%;
+}
+
+.tooth-lower::after {
+    top: -7px;
+    bottom: auto;
+    border-top: 1px solid currentColor;
+    border-bottom: 0;
+    border-radius: 50% 50% 0 0;
+}
+
+.tooth-healthy {
+    border-color: #a7f3d0;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.tooth-watch {
+    border-color: #fcd34d;
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.tooth-filled {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.tooth-decayed {
+    border-color: #fca5a5;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.tooth-missing {
+    border-color: #94a3b8;
+    background: #e2e8f0;
+    color: #475569;
+}

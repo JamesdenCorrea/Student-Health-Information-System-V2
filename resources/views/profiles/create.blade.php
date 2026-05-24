@@ -5,7 +5,7 @@
             <h1 class="mt-1 text-3xl font-semibold text-slate-950">Create student profile</h1>
         </div>
 
-        <form method="POST" action="{{ route('profiles.store') }}" class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <form method="POST" action="{{ route('profiles.store') }}" enctype="multipart/form-data" class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
             @include('profiles._form', ['submitLabel' => 'Create profile'])
         </form>
     </section>

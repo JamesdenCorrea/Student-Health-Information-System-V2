@@ -12,6 +12,14 @@
 @endif
 
 <div class="grid gap-5 md:grid-cols-2">
+    <div class="md:col-span-2">
+        <label class="{{ $labelClass }}" for="photo">Student photo ID</label>
+        <input class="{{ $fieldClass }}" id="photo" name="photo" type="file" accept="image/*">
+        @if ($student->photo_path)
+            <p class="mt-2 text-sm text-slate-500">Current photo is saved. Uploading a new image replaces it.</p>
+        @endif
+        @error('photo') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
+    </div>
     <div>
         <label class="{{ $labelClass }}" for="student_number">Student number</label>
         <input class="{{ $fieldClass }}" id="student_number" name="student_number" value="{{ old('student_number', $student->student_number) }}" required>

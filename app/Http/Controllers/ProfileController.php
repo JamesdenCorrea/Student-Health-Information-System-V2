@@ -6,6 +6,7 @@ use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -15,9 +16,12 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
+        $hasSearch = filled($request->query('search'));
+
         $profiles = Student::query()
             ->with('healthProfile')
             ->when($user->isParent(), fn ($query) => $query->whereHas('parents', fn ($query) => $query->whereKey($user->id)))
+            ->when($user->isClinicStaff() && ! $hasSearch, fn ($query) => $query->whereRaw('1 = 0'))
             ->when($request->query('search'), function ($query, string $search): void {
                 $query->where(function ($query) use ($search): void {
                     $query
@@ -52,6 +56,10 @@ class ProfileController extends Controller
 
         $student = DB::transaction(function () use ($validated, $healthProfile): Student {
             unset($validated['health_profile']);
+
+            if (request()->hasFile('photo')) {
+                $validated['photo_path'] = request()->file('photo')->store('student-photos', 'public');
+            }
 
             $student = Student::create($validated);
             if ($healthProfile !== []) {
@@ -97,8 +105,16 @@ class ProfileController extends Controller
             ? $this->normalizeHealthProfile($validated['health_profile'] ?? [])
             : null;
 
-        DB::transaction(function () use ($profile, $validated, $healthProfile): void {
+        DB::transaction(function () use ($request, $profile, $validated, $healthProfile): void {
             unset($validated['health_profile']);
+
+            if ($request->hasFile('photo')) {
+                if ($profile->photo_path) {
+                    Storage::disk('public')->delete($profile->photo_path);
+                }
+
+                $validated['photo_path'] = $request->file('photo')->store('student-photos', 'public');
+            }
 
             $profile->update($validated);
             if ($healthProfile !== null) {
@@ -137,6 +153,7 @@ class ProfileController extends Controller
                 'max:50',
                 Rule::unique('students', 'student_number')->ignore($student),
             ],
+            'photo' => ['nullable', 'image', 'max:2048'],
             'first_name' => ['required', 'string', 'max:255'],
             'middle_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],

@@ -2,10 +2,19 @@
     <section class="bg-gradient-to-r from-teal-950 via-teal-900 to-emerald-700 text-white">
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-                <div>
-                    <p class="text-sm font-medium text-teal-50/80">{{ $student->student_number }}</p>
-                    <h1 class="mt-1 text-3xl font-semibold">{{ $student->first_name }} {{ $student->last_name }}</h1>
-                    <p class="mt-2 text-teal-50/80">Grade {{ $student->grade_level ?? 'N/A' }} {{ $student->section }}</p>
+                <div class="flex items-center gap-4">
+                    <div class="grid size-20 shrink-0 place-items-center overflow-hidden rounded-lg border border-white/20 bg-white/10 text-xl font-semibold">
+                        @if ($student->photo_path)
+                            <img src="{{ asset('storage/'.$student->photo_path) }}" alt="{{ $student->first_name }} {{ $student->last_name }}" class="h-full w-full object-cover">
+                        @else
+                            {{ str($student->first_name)->substr(0, 1) }}{{ str($student->last_name)->substr(0, 1) }}
+                        @endif
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-teal-50/80">{{ $student->student_number }}</p>
+                        <h1 class="mt-1 text-3xl font-semibold">{{ $student->first_name }} {{ $student->last_name }}</h1>
+                        <p class="mt-2 text-teal-50/80">Grade {{ $student->grade_level ?? 'N/A' }} {{ $student->section }}</p>
+                    </div>
                 </div>
                 @if (! auth()->user()->isParent())
                     <div class="flex flex-wrap gap-3">
@@ -30,9 +39,8 @@
 
     <section class="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
         <div class="space-y-6">
-            @if (auth()->user()->canViewHealthRecords($student))
             <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 class="font-semibold text-slate-950">Student information</h2>
+                <h2 class="font-semibold text-slate-950">Basic student information</h2>
                 <dl class="mt-5 grid gap-4 sm:grid-cols-2">
                     @foreach ([
                         'Birth date' => $student->birth_date?->format('M d, Y') ?? 'N/A',
@@ -50,13 +58,59 @@
                     @endforeach
                 </dl>
             </div>
-            @else
-                <div class="rounded-lg border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-900">
-                    Health details are restricted to clinic staff and assigned parents.
-                </div>
-            @endif
 
             @if (auth()->user()->canViewHealthRecords($student))
+                <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                    <h2 class="font-semibold text-slate-950">Health profile</h2>
+                    <dl class="mt-5 grid gap-4 sm:grid-cols-2">
+                        @foreach ([
+                            'Blood type' => $student->healthProfile?->blood_type ?? 'N/A',
+                            'Allergies' => implode(', ', $student->healthProfile?->allergies ?? []) ?: 'None listed',
+                            'Chronic conditions' => implode(', ', $student->healthProfile?->chronic_conditions ?? []) ?: 'None listed',
+                            'Medications' => implode(', ', $student->healthProfile?->medications ?? []) ?: 'None listed',
+                            'Immunizations' => implode(', ', $student->healthProfile?->immunizations ?? []) ?: 'None listed',
+                            'Physician' => $student->healthProfile?->physician_name ?? 'N/A',
+                            'Physician contact' => $student->healthProfile?->physician_contact ?? 'N/A',
+                        ] as $label => $value)
+                            <div>
+                                <dt class="text-sm font-medium text-slate-500">{{ $label }}</dt>
+                                <dd class="mt-1 text-sm text-slate-950">{{ $value }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                    @if ($student->healthProfile?->notes)
+                        <div class="mt-5 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-700">{{ $student->healthProfile->notes }}</div>
+                    @endif
+                </div>
+
+                @if (auth()->user()->isParent())
+                    @php
+                        $latestBmi = $student->bmiRecords->first();
+                        $latestVisit = $student->clinicVisits->first();
+                        $recommendations = collect();
+                        if ($latestBmi && $latestBmi->category !== 'Normal') {
+                            $recommendations->push('Schedule a nutrition and activity follow-up because the latest BMI is '.$latestBmi->category.'.');
+                        }
+                        if (($student->healthProfile?->allergies ?? []) !== []) {
+                            $recommendations->push('Keep allergy information updated and inform advisers about known allergy triggers.');
+                        }
+                        if ($latestVisit && $latestVisit->disposition === 'sent_home') {
+                            $recommendations->push('Monitor symptoms at home and follow up with the clinic before returning to regular activities.');
+                        }
+                        if ($recommendations->isEmpty()) {
+                            $recommendations->push('Maintain yearly BMI checks, dental reviews, updated immunizations, and regular hydration/sleep routines.');
+                        }
+                    @endphp
+                    <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
+                        <h2 class="font-semibold text-emerald-950">Recommendations</h2>
+                        <ul class="mt-4 space-y-2 text-sm leading-6 text-emerald-900">
+                            @foreach ($recommendations as $recommendation)
+                                <li>{{ $recommendation }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
                     <h2 class="font-semibold text-slate-950">Yearly BMI</h2>
                     <div class="mt-4 divide-y divide-slate-100">
@@ -87,30 +141,11 @@
                         <p class="mt-4 text-sm text-slate-500">No dental records yet.</p>
                     @endif
                 </div>
+            @else
+                <div class="rounded-lg border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-900">
+                    Health records, clinic visits, BMI, and dental information are restricted to clinic staff and assigned parents.
+                </div>
             @endif
-
-            <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 class="font-semibold text-slate-950">Health profile</h2>
-                <dl class="mt-5 grid gap-4 sm:grid-cols-2">
-                    @foreach ([
-                        'Blood type' => $student->healthProfile?->blood_type ?? 'N/A',
-                        'Allergies' => implode(', ', $student->healthProfile?->allergies ?? []) ?: 'None listed',
-                        'Chronic conditions' => implode(', ', $student->healthProfile?->chronic_conditions ?? []) ?: 'None listed',
-                        'Medications' => implode(', ', $student->healthProfile?->medications ?? []) ?: 'None listed',
-                        'Immunizations' => implode(', ', $student->healthProfile?->immunizations ?? []) ?: 'None listed',
-                        'Physician' => $student->healthProfile?->physician_name ?? 'N/A',
-                        'Physician contact' => $student->healthProfile?->physician_contact ?? 'N/A',
-                    ] as $label => $value)
-                        <div>
-                            <dt class="text-sm font-medium text-slate-500">{{ $label }}</dt>
-                            <dd class="mt-1 text-sm text-slate-950">{{ $value }}</dd>
-                        </div>
-                    @endforeach
-                </dl>
-                @if ($student->healthProfile?->notes)
-                    <div class="mt-5 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-700">{{ $student->healthProfile->notes }}</div>
-                @endif
-            </div>
         </div>
 
         @if (auth()->user()->canViewHealthRecords($student))

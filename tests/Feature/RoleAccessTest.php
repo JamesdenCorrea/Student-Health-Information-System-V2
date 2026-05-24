@@ -27,6 +27,50 @@ class RoleAccessTest extends TestCase
         $this->actingAs($staff)->get('/health-records')->assertOk();
     }
 
+    public function test_clinic_staff_health_records_are_empty_until_search(): void
+    {
+        $staff = User::factory()->create(['role' => User::ROLE_CLINIC_STAFF]);
+        $student = Student::create([
+            'student_number' => 'S-SEARCH',
+            'first_name' => 'Searchable',
+            'last_name' => 'Student',
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($staff)
+            ->get('/health-records')
+            ->assertOk()
+            ->assertSee('Search a student first')
+            ->assertDontSee($student->student_number);
+
+        $this->actingAs($staff)
+            ->get('/health-records?search=S-SEARCH')
+            ->assertOk()
+            ->assertSee($student->student_number);
+    }
+
+    public function test_admin_profile_view_hides_health_records(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $student = Student::create([
+            'student_number' => 'S-ADMIN',
+            'first_name' => 'Admin',
+            'last_name' => 'Visible',
+            'status' => 'active',
+        ]);
+        $student->healthProfile()->create([
+            'blood_type' => 'O+',
+            'allergies' => ['Peanuts'],
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('profiles.show', $student))
+            ->assertOk()
+            ->assertSee('Basic student information')
+            ->assertDontSee('Health profile')
+            ->assertDontSee('Peanuts');
+    }
+
     public function test_parent_can_only_view_assigned_child_profile(): void
     {
         $parent = User::factory()->create(['role' => User::ROLE_PARENT]);

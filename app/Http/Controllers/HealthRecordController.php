@@ -12,8 +12,11 @@ class HealthRecordController extends Controller
     {
         abort_unless($request->user()->isClinicStaff(), 403);
 
+        $hasSearch = filled($request->query('search'));
+
         $students = Student::query()
             ->with(['healthProfile', 'clinicVisits', 'bmiRecords', 'dentalRecords'])
+            ->when(! $hasSearch, fn ($query) => $query->whereRaw('1 = 0'))
             ->when($request->query('search'), function ($query, string $search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('student_number', 'like', "%{$search}%")
@@ -25,6 +28,9 @@ class HealthRecordController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('health-records.index', compact('students'));
+        return view('health-records.index', [
+            'students' => $students,
+            'hasSearch' => $hasSearch,
+        ]);
     }
 }

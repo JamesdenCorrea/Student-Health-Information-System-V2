@@ -10,8 +10,9 @@
             @endif
         </div>
 
-        <form class="mt-6">
+        <form class="mt-6 flex gap-3">
             <input name="search" value="{{ request('search') }}" placeholder="Search name, student number, grade" class="w-full rounded-md border border-slate-300 px-4 py-3 text-sm outline-none focus:border-teal-800 focus:ring-2 focus:ring-teal-800/15">
+            <button class="rounded-md bg-teal-950 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-teal-900">Search</button>
         </form>
 
         <div class="mt-6 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -48,7 +49,13 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-5 py-10 text-center text-slate-500">No profiles found.</td>
+                                <td colspan="5" class="px-5 py-10 text-center text-slate-500">
+                                    @if (auth()->user()->isClinicStaff() && ! request('search'))
+                                        Search a student first to display matching profiles.
+                                    @else
+                                        No profiles found.
+                                    @endif
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -5,12 +5,13 @@
             <h1 class="mt-1 text-3xl font-semibold text-slate-950">Student health records</h1>
         </div>
 
-        <form class="mb-5">
-            <input name="search" value="{{ request('search') }}" placeholder="Search before opening a student health record" class="w-full rounded-md border border-slate-300 px-4 py-3 text-sm outline-none focus:border-teal-800 focus:ring-2 focus:ring-teal-800/15">
+        <form class="mb-5 flex gap-3">
+            <input name="search" value="{{ request('search') }}" placeholder="Search student number, first name, or last name" class="w-full rounded-md border border-slate-300 px-4 py-3 text-sm outline-none focus:border-teal-800 focus:ring-2 focus:ring-teal-800/15">
+            <button class="rounded-md bg-teal-950 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-teal-900">Search</button>
         </form>
 
         <div class="space-y-3">
-            @foreach ($students as $student)
+            @forelse ($students as $student)
                 <details class="rounded-lg border border-slate-200 bg-white shadow-sm">
                     <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4">
                         <span>
@@ -38,7 +39,11 @@
                         </div>
                     </div>
                 </details>
-            @endforeach
+            @empty
+                <div class="rounded-lg border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 shadow-sm">
+                    {{ $hasSearch ? 'No matching health record found.' : 'Search a student first to display health records.' }}
+                </div>
+            @endforelse
         </div>
 
         <div class="mt-5">{{ $students->links() }}</div>
