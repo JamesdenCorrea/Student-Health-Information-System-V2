@@ -1,7 +1,8 @@
 <x-layouts.guest title="Register">
     <div class="mx-auto max-w-md">
+        <div class="mb-8 grid size-12 place-items-center rounded-lg bg-teal-50 text-sm font-bold text-teal-950 ring-1 ring-teal-900/10">SH</div>
         <h1 class="text-3xl font-semibold text-slate-950">Register</h1>
-        <p class="mt-2 text-sm text-slate-500">New accounts begin with the user role.</p>
+        <p class="mt-2 text-sm text-slate-500">Create an account for review. Admin can adjust roles after registration.</p>
 
         <form method="POST" action="{{ route('register.store') }}" class="mt-8 space-y-5">
             @csrf

@@ -6,7 +6,7 @@
         </div>
 
         <div class="grid gap-6 lg:grid-cols-[1fr_380px]">
-            <form method="POST" action="{{ route('admin.parent-assignments.store') }}" class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <form method="POST" action="{{ route('admin.parent-assignments.store') }}" class="sh-panel rounded-lg p-5">
                 @csrf
                 <h2 class="font-semibold text-slate-950">Match parent and student</h2>
                 <div class="mt-5 grid gap-4 md:grid-cols-2">
@@ -45,7 +45,7 @@
                 </div>
             </form>
 
-            <aside class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <aside class="sh-panel rounded-lg p-5">
                 <h2 class="font-semibold text-slate-950">Assigned children</h2>
                 @if ($selectedParent)
                     <p class="mt-1 text-sm text-slate-500">{{ $selectedParent->name }}</p>

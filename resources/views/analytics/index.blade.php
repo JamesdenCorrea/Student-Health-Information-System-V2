@@ -6,25 +6,25 @@
         </div>
 
         <div class="grid gap-4 md:grid-cols-4">
-            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="sh-panel sh-panel-hover rounded-lg p-5">
                 <p class="text-sm text-slate-500">Students</p>
                 <p class="mt-3 text-3xl font-semibold">{{ $studentCount }}</p>
             </div>
-            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="sh-panel sh-panel-hover rounded-lg p-5">
                 <p class="text-sm text-slate-500">Active</p>
                 <p class="mt-3 text-3xl font-semibold">{{ $activeCount }}</p>
             </div>
             @if (! auth()->user()->isAdmin())
-                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="sh-panel sh-panel-hover rounded-lg p-5">
                     <p class="text-sm text-slate-500">Clinic visits</p>
                     <p class="mt-3 text-3xl font-semibold">{{ $clinicVisitCount }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="sh-panel sh-panel-hover rounded-lg p-5">
                     <p class="text-sm text-slate-500">Dental concerns</p>
                     <p class="mt-3 text-3xl font-semibold">{{ $dentalConcernCount }}</p>
                 </div>
             @else
-                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm md:col-span-2">
+                <div class="sh-panel rounded-lg p-5 md:col-span-2">
                     <p class="text-sm text-slate-500">Health privacy</p>
                     <p class="mt-3 text-sm leading-6 text-slate-700">Admin analytics exclude health records, clinic visits, dental records, and BMI data.</p>
                 </div>
@@ -32,7 +32,7 @@
         </div>
 
         <div class="mt-6 grid gap-6 lg:grid-cols-2">
-            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="sh-panel rounded-lg p-5">
                 <h2 class="font-semibold text-slate-950">Students by status</h2>
                 @php $statusMax = max(1, (int) $statusCounts->max()); @endphp
                 <div class="mt-5 space-y-4">
@@ -52,7 +52,7 @@
                 </div>
             </div>
 
-            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="sh-panel rounded-lg p-5">
                 <h2 class="font-semibold text-slate-950">Students by grade</h2>
                 @php $gradeMax = max(1, (int) $gradeCounts->max()); @endphp
                 <div class="mt-5 flex h-56 items-end gap-3 border-b border-slate-200 pb-2">
@@ -70,7 +70,7 @@
 
         @if (! auth()->user()->isAdmin())
             <div class="mt-6 grid gap-6 lg:grid-cols-2">
-                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="sh-panel rounded-lg p-5">
                     <h2 class="font-semibold text-slate-950">Clinic visit trend</h2>
                     @php $visitMax = max(1, (int) $visitTrend->max()); @endphp
                     <div class="mt-5 flex h-56 items-end gap-3 border-b border-slate-200 pb-2">
@@ -85,7 +85,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="sh-panel rounded-lg p-5">
                     <h2 class="font-semibold text-slate-950">BMI categories</h2>
                     @php $bmiMax = max(1, (int) $bmiCategories->max()); @endphp
                     <div class="mt-5 space-y-4">
@@ -106,7 +106,7 @@
                 </div>
             </div>
 
-            <div class="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="sh-panel mt-6 rounded-lg p-5">
                 <h2 class="font-semibold text-slate-950">Latest BMI checks</h2>
                 <div class="mt-4 divide-y divide-slate-100">
                     @forelse ($latestBmi as $record)

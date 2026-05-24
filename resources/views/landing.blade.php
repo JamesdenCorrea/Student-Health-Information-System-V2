@@ -1,6 +1,6 @@
 <x-layouts.app title="Student Health Information System">
     <section class="overflow-hidden bg-gradient-to-br from-teal-950 via-teal-900 to-emerald-700 text-white">
-        <div class="mx-auto grid min-h-[calc(100vh-65px)] max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
+        <div class="mx-auto grid min-h-[calc(100vh-113px)] max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
             <div>
                 <div class="inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-sm text-teal-50">School clinic records, organized</div>
                 <h1 class="mt-6 max-w-3xl text-4xl font-semibold leading-tight sm:text-6xl">Student Health Information System</h1>

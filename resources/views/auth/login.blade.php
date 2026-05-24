@@ -1,5 +1,6 @@
 <x-layouts.guest title="Login">
     <div class="mx-auto max-w-md">
+        <div class="mb-8 grid size-12 place-items-center rounded-lg bg-teal-50 text-sm font-bold text-teal-950 ring-1 ring-teal-900/10">SH</div>
         <h1 class="text-3xl font-semibold text-slate-950">Login</h1>
         <p class="mt-2 text-sm text-slate-500">Access the student health workspace.</p>
 
@@ -24,6 +25,10 @@
 
             <button class="w-full rounded-md bg-gradient-to-r from-teal-950 via-teal-800 to-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:from-teal-900 hover:to-emerald-500">Login</button>
         </form>
+
+        <div class="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600">
+            Demo accounts use the password <span class="font-semibold text-slate-800">password</span>: admin@studenthealth.test, clinic@studenthealth.test, parent@studenthealth.test.
+        </div>
 
         <p class="mt-6 text-center text-sm text-slate-500">
             No account yet?
